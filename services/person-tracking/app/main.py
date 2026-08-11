@@ -15,10 +15,11 @@ TORCHSERVE_URL = (
 
 
 class CentroidTracker:
-    def __init__(self, max_distance=100):
+    def __init__(self, max_distance=100, max_age=5):
         self.next_id = 1
         self.tracks = {}
         self.max_distance = max_distance
+        self.max_age = max_age
 
     def centroid(self, box):
         x1, y1, x2, y2 = box
@@ -43,6 +44,8 @@ class CentroidTracker:
         updated_tracks = {}
         used_ids = set()
 
+        # Try to match current detections
+        # to existing tracks.
         for detection, centroid in zip(
             detections,
             current_centroids,
@@ -71,9 +74,25 @@ class CentroidTracker:
                 "centroid": centroid,
                 "box": detection["box"],
                 "confidence": detection["confidence"],
+                "age": 0,
             }
 
             used_ids.add(best_id)
+
+        # Keep tracks that were temporarily missed.
+        for track_id, track in self.tracks.items():
+            if track_id in used_ids:
+                continue
+
+            age = track["age"] + 1
+
+            if age <= self.max_age:
+                updated_tracks[track_id] = {
+                    "centroid": track["centroid"],
+                    "box": track["box"],
+                    "confidence": track["confidence"],
+                    "age": age,
+                }
 
         self.tracks = updated_tracks
 

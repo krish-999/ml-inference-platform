@@ -23,6 +23,27 @@ services:
     depends_on:
       - torchserve
 
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      - ml-platform
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - torchserve
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - ml-platform
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
 networks:
   ml-platform:
     driver: bridge
@@ -30,3 +51,5 @@ networks:
 volumes:
   model-store:
   shared-config:
+  prometheus-data:
+  grafana-data:

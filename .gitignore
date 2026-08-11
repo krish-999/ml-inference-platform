@@ -2,12 +2,16 @@
 __pycache__/
 *.pyc
 
-# Generated model artifacts
+# Model artifacts
 model-store/*.mar
-models/**/*.pth
+*.pth
 
 # Local test data
 models/person-detection/test-images/
+
+# Monitoring runtime data
+prometheus-data/
+grafana-data/
 
 # OS/editor files
 .DS_Store
