@@ -3,7 +3,14 @@ services:
     image: hello-world
     networks:
       - ml-platform
+    volumes:
+      - model-store:/model-store
+      - shared-config:/config
 
 networks:
   ml-platform:
     driver: bridge
+
+volumes:
+  model-store:
+  shared-config:
