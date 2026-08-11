@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Generated model artifacts
+model-store/*.mar
+models/**/*.pth
+
+# Local test data
+models/person-detection/test-images/
+
+# OS/editor files
+.DS_Store

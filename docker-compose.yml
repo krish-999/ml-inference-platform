@@ -1,11 +1,16 @@
 services:
-  placeholder:
-    image: hello-world
+  torchserve:
+    build:
+      context: .
+      dockerfile: torchserve/Dockerfile
     networks:
       - ml-platform
     volumes:
       - model-store:/model-store
       - shared-config:/config
+    ports:
+      - "8080:8080"
+      - "8082:8082"
 
 networks:
   ml-platform:
