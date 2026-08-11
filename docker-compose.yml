@@ -12,6 +12,17 @@ services:
       - "8080:8080"
       - "8082:8082"
 
+  person-tracking:
+    build:
+      context: .
+      dockerfile: services/person-tracking/Dockerfile
+    networks:
+      - ml-platform
+    ports:
+      - "8000:8000"
+    depends_on:
+      - torchserve
+
 networks:
   ml-platform:
     driver: bridge
