@@ -1,0 +1,9 @@
+services:
+  placeholder:
+    image: hello-world
+    networks:
+      - ml-platform
+
+networks:
+  ml-platform:
+    driver: bridge
