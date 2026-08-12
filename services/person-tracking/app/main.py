@@ -2,12 +2,10 @@ import io
 import math
 
 import requests
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile
 from PIL import Image
 
-
 app = FastAPI(title="Person Tracking Service")
-
 
 TORCHSERVE_URL = (
     "http://torchserve:8080/predictions/person_detector"
@@ -109,7 +107,8 @@ class CentroidTracker:
         return results
 
 
-tracker = CentroidTracker()
+# One tracker per tracking session.
+trackers = {}
 
 
 @app.get("/health")
@@ -121,7 +120,8 @@ def health():
 
 @app.post("/track")
 async def track(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    session_id: str = Form("default"),
 ):
     image_bytes = await file.read()
 
@@ -129,6 +129,12 @@ async def track(
     Image.open(
         io.BytesIO(image_bytes)
     ).verify()
+
+    # Create a tracker for this session if it doesn't exist.
+    if session_id not in trackers:
+        trackers[session_id] = CentroidTracker()
+
+    tracker = trackers[session_id]
 
     response = requests.post(
         TORCHSERVE_URL,
@@ -148,11 +154,20 @@ async def track(
     else:
         detections = detection_result[0]["detections"]
 
-    tracks = tracker.update(
-        detections
-    )
+    tracks = tracker.update(detections)
 
     return {
+        "session_id": session_id,
         "tracks": tracks,
         "count": len(tracks),
+    }
+
+
+@app.post("/reset/{session_id}")
+def reset_session(session_id: str):
+    removed = trackers.pop(session_id, None) is not None
+
+    return {
+        "session_id": session_id,
+        "reset": removed,
     }

@@ -15,3 +15,5 @@ grafana-data/
 
 # OS/editor files
 .DS_Store
+*.pt
+*.mar
